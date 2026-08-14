@@ -1,9 +1,14 @@
 package org.example.ui;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.Scanner;
 
 public class ConsoleUI {
     private static final Scanner scanner = new Scanner(System.in);
+    private static final String DATE_PATTERN = "dd/MM/yyyy";
+    private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern(DATE_PATTERN);
 
     public static void imprimirCabecalho(String titulo) {
         System.out.println("\n========================================");
@@ -41,6 +46,37 @@ public class ConsoleUI {
         }
         limparTela();
         return escolha;
+    }
+
+    public static String lerTexto(String mensagem) {
+        System.out.print(mensagem);
+        return scanner.nextLine();
+    }
+
+    public static LocalDate lerData(String mensagem) {
+        while (true) {
+            String entrada = lerTexto(mensagem);
+
+            try {
+                return LocalDate.parse(entrada, DATE_FORMATTER);
+            } catch (DateTimeParseException e) {
+                System.out.println("Data inválida. Use o formato " + DATE_PATTERN + ".");
+            }
+        }
+    }
+
+    public static <T extends Enum<T>> T lerEnum(String mensagem, Class<T> enumClass) {
+        T[] valores = enumClass.getEnumConstants();
+
+        System.out.println("\n" + mensagem);
+
+        for (int i = 0; i < valores.length; i++) {
+            System.out.println((i + 1) + " - " + valores[i]);
+        }
+
+        int opcao = lerEscolha("Escolha: ", 1, valores.length);
+
+        return valores[opcao - 1];
     }
 
     public static int pedirOpcaoPrincipal() {
