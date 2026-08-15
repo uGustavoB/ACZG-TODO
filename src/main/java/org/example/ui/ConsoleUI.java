@@ -31,6 +31,24 @@ public class ConsoleUI {
         System.out.println(msg);
     }
 
+    public static String lerTexto(String mensagem) {
+        return lerTexto(mensagem, false);
+    }
+
+    public static String lerTexto(String mensagem, boolean permiteVazio) {
+        while (true) {
+            System.out.print(mensagem);
+            String entrada = scanner.nextLine();
+            
+            if (!permiteVazio && entrada.trim().isEmpty()) {
+                System.out.println("Este campo não pode ser vazio. Tente novamente.");
+                continue;
+            }
+            
+            return entrada;
+        }
+    }
+
     public static int lerEscolha(String mensagem, int min, int max) {
         return lerEscolha(mensagem, min, max, false);
     }
@@ -61,20 +79,15 @@ public class ConsoleUI {
         return escolha;
     }
 
-    public static String lerTexto(String mensagem) {
-        System.out.print(mensagem);
-        return scanner.nextLine();
-    }
-
     public static LocalDate lerData(String mensagem) {
         return lerData(mensagem, false);
     }
 
     public static LocalDate lerData(String mensagem, boolean permiteVazio) {
         while (true) {
-            String entrada = lerTexto(mensagem);
+            String entrada = lerTexto(mensagem, permiteVazio);
             
-            if (permiteVazio && entrada.trim().isEmpty()) {
+            if (permiteVazio && (entrada == null || entrada.trim().isEmpty())) {
                 return null;
             }
 
