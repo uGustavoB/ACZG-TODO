@@ -48,7 +48,7 @@ public class Main {
                     break;
 
                 case 2:
-                    TarefaService.listarTarefas(tarefas);
+                    TarefaService.exibirMenuListagem(tarefas);
                     ConsoleUI.aguardarContinuacao();
                     break;
 

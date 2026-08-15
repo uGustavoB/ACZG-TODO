@@ -9,6 +9,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Scanner;
+import java.util.stream.Collectors;
 
 public class TarefaService {
     private static final Scanner scanner = new Scanner(System.in);
@@ -35,6 +36,54 @@ public class TarefaService {
         tarefas.sort(Comparator.comparingInt(Tarefa::getPrioridade).reversed());
 
         System.out.println("Tarefa adicionada com sucesso!");
+    }
+
+    public static void exibirMenuListagem(List<Tarefa> tarefas) {
+        ConsoleUI.limparTela();
+        ConsoleUI.imprimirCabecalho("Filtros de Listagem");
+
+        if (tarefas.isEmpty()) {
+            ConsoleUI.imprimirMensagem("Nenhuma tarefa cadastrada.");
+            return;
+        }
+
+        System.out.println("1 - Todas as tarefas");
+        System.out.println("2 - Filtrar por Categoria");
+        System.out.println("3 - Filtrar por Prioridade");
+        System.out.println("4 - Filtrar por Status");
+        
+        int opcao = ConsoleUI.lerEscolha("Como deseja listar? ", 1, 4);
+
+        List<Tarefa> tarefasFiltradas = tarefas;
+
+        if (opcao == 2) {
+            String categoria = ConsoleUI.lerTexto("Digite a categoria: ");
+            tarefasFiltradas = tarefas.stream()
+                    .filter(t -> t.getCategoria().equalsIgnoreCase(categoria))
+                    .collect(Collectors.toList());
+        } else if (opcao == 3) {
+            int prioridade = ConsoleUI.lerEscolha("Digite a prioridade (1 a 5): ", 1, 5);
+            tarefasFiltradas = tarefas.stream()
+                    .filter(t -> t.getPrioridade() == prioridade)
+                    .collect(Collectors.toList());
+        } else if (opcao == 4) {
+            TarefaStatus status = ConsoleUI.lerEnum("Escolha o Status", TarefaStatus.class);
+            tarefasFiltradas = tarefas.stream()
+                    .filter(t -> t.getStatus() == status)
+                    .collect(Collectors.toList());
+        }
+
+        ConsoleUI.limparTela();
+        ConsoleUI.imprimirCabecalho("Lista de Tarefas");
+
+        if (tarefasFiltradas.isEmpty()) {
+            ConsoleUI.imprimirMensagem("Nenhuma tarefa encontrada com esse filtro.");
+            return;
+        }
+
+        for (Tarefa t : tarefasFiltradas) {
+            System.out.println("- " + t.toString());
+        }
     }
 
     public static void listarTarefas(List<Tarefa> tarefas) {
@@ -64,12 +113,12 @@ public class TarefaService {
         ConsoleUI.limparTela();
         ConsoleUI.imprimirCabecalho("Atualizando Tarefa: " + tarefa.getNome());
 
-        String novoNome = ConsoleUI.lerTexto("Nome [" + tarefa.getNome() + "]: ");
+        String novoNome = ConsoleUI.lerTexto("Nome [" + tarefa.getNome() + "]: ", true);
         if (!novoNome.trim().isEmpty()) {
             tarefa.setNome(novoNome);
         }
 
-        String novaDescricao = ConsoleUI.lerTexto("Descrição [" + tarefa.getDescricao() + "]: ");
+        String novaDescricao = ConsoleUI.lerTexto("Descrição [" + tarefa.getDescricao() + "]: ", true);
         if (!novaDescricao.trim().isEmpty()) {
             tarefa.setDescricao(novaDescricao);
         }
@@ -84,7 +133,7 @@ public class TarefaService {
             tarefa.setPrioridade(novaPrioridade);
         }
 
-        String novaCategoria = ConsoleUI.lerTexto("Categoria [" + tarefa.getCategoria() + "]: ");
+        String novaCategoria = ConsoleUI.lerTexto("Categoria [" + tarefa.getCategoria() + "]: ", true);
         if (!novaCategoria.trim().isEmpty()) {
             tarefa.setCategoria(novaCategoria);
         }
