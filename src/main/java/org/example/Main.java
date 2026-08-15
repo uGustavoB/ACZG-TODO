@@ -1,6 +1,7 @@
 package org.example;
 
 import org.example.model.Tarefa;
+import org.example.services.CsvService;
 import org.example.services.TarefaService;
 import org.example.ui.ConsoleUI;
 
@@ -11,7 +12,7 @@ public class Main {
 
     public static void main(String[] args) {
         boolean executando = true;
-        tarefas = new java.util.ArrayList<>();
+        tarefas = CsvService.carregarTarefas();
 
         while (executando) {
             ConsoleUI.limparTela();

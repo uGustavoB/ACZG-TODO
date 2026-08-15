@@ -34,6 +34,7 @@ public class TarefaService {
         tarefas.add(novaTarefa);
 
         tarefas.sort(Comparator.comparingInt(Tarefa::getPrioridade).reversed());
+        CsvService.salvarTarefas(tarefas);
 
         System.out.println("Tarefa adicionada com sucesso!");
     }
@@ -83,6 +84,19 @@ public class TarefaService {
 
         for (Tarefa t : tarefasFiltradas) {
             System.out.println("- " + t.toString());
+        }
+
+        if (opcao == 1) {
+            long concluidas = tarefas.stream().filter(t -> t.getStatus() == TarefaStatus.DONE).count();
+            long aFazer = tarefas.stream().filter(t -> t.getStatus() == TarefaStatus.TODO).count();
+            long emAndamento = tarefas.stream().filter(t -> t.getStatus() == TarefaStatus.DOING).count();
+
+            System.out.println("\n----------------------------------------");
+            System.out.println("Resumo das Tarefas:");
+            System.out.println("Total cadastradas: " + tarefas.size());
+            System.out.println("Para fazer (TODO): " + aFazer);
+            System.out.println("Sendo feitas (DOING): " + emAndamento);
+            System.out.println("Concluídas (DONE): " + concluidas);
         }
     }
 
@@ -144,6 +158,7 @@ public class TarefaService {
         }
 
         tarefas.sort(Comparator.comparingInt(Tarefa::getPrioridade).reversed());
+        CsvService.salvarTarefas(tarefas);
 
         System.out.println("Tarefa atualizada com sucesso!");
     }
@@ -157,6 +172,8 @@ public class TarefaService {
 
         int indice = ConsoleUI.lerEscolha("Escolha o número da tarefa para deletar: ", 1, tarefas.size()) - 1;
         Tarefa tarefaRemovida = tarefas.remove(indice);
+        
+        CsvService.salvarTarefas(tarefas);
 
         System.out.println("Tarefa '" + tarefaRemovida.getNome() + "' deletada com sucesso!");
     }
