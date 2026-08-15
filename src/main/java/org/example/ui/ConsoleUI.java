@@ -21,7 +21,7 @@ public class ConsoleUI {
         System.out.flush();
     }
 
-    private static void aguardarContinuacao() {
+    public static void aguardarContinuacao() {
         System.out.println("\nPressione Enter para continuar...");
         scanner.nextLine();
         limparTela();
@@ -32,12 +32,25 @@ public class ConsoleUI {
     }
 
     public static int lerEscolha(String mensagem, int min, int max) {
+        return lerEscolha(mensagem, min, max, false);
+    }
+
+    public static Integer lerEscolha(String mensagem, int min, int max, boolean permiteVazio) {
         int escolha = -1;
-        while (escolha < min || escolha > max) {
+        while (true) {
             System.out.print("\n" + mensagem);
+            String entrada = scanner.nextLine();
+            
+            if (permiteVazio && entrada.trim().isEmpty()) {
+                limparTela();
+                return null;
+            }
+            
             try {
-                escolha = Integer.parseInt(scanner.nextLine());
-                if (escolha < min || escolha > max) {
+                escolha = Integer.parseInt(entrada);
+                if (escolha >= min && escolha <= max) {
+                    break;
+                } else {
                     System.out.println("Opção inválida. Escolha entre " + min + " e " + max + ".");
                 }
             } catch (NumberFormatException e) {
@@ -54,8 +67,16 @@ public class ConsoleUI {
     }
 
     public static LocalDate lerData(String mensagem) {
+        return lerData(mensagem, false);
+    }
+
+    public static LocalDate lerData(String mensagem, boolean permiteVazio) {
         while (true) {
             String entrada = lerTexto(mensagem);
+            
+            if (permiteVazio && entrada.trim().isEmpty()) {
+                return null;
+            }
 
             try {
                 return LocalDate.parse(entrada, DATE_FORMATTER);
@@ -66,6 +87,10 @@ public class ConsoleUI {
     }
 
     public static <T extends Enum<T>> T lerEnum(String mensagem, Class<T> enumClass) {
+        return lerEnum(mensagem, enumClass, false);
+    }
+
+    public static <T extends Enum<T>> T lerEnum(String mensagem, Class<T> enumClass, boolean permiteVazio) {
         T[] valores = enumClass.getEnumConstants();
 
         System.out.println("\n" + mensagem);
@@ -74,7 +99,11 @@ public class ConsoleUI {
             System.out.println((i + 1) + " - " + valores[i]);
         }
 
-        int opcao = lerEscolha("Escolha: ", 1, valores.length);
+        Integer opcao = lerEscolha("Escolha: ", 1, valores.length, permiteVazio);
+        
+        if (opcao == null) {
+            return null;
+        }
 
         return valores[opcao - 1];
     }
@@ -91,9 +120,10 @@ public class ConsoleUI {
         System.out.println("\nEscolha uma ação:");
         System.out.println("1 - Criar tarefa");
         System.out.println("2 - Listar tarefas");
-        System.out.println("3 - Deletar tarefa");
-        System.out.println("4 - Voltar ao menu principal");
+        System.out.println("3 - Atualizar tarefa");
+        System.out.println("4 - Deletar tarefa");
+        System.out.println("5 - Voltar ao menu principal");
 
-        return lerEscolha("Sua escolha: ", 1, 4);
+        return lerEscolha("Sua escolha: ", 1, 5);
     }
 }
