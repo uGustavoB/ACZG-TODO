@@ -5,21 +5,24 @@ import org.example.model.Tarefa;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.HashMap;
+import java.time.format.DateTimeFormatter;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 public class AlarmeService {
+    private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+
     private static final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(2, runnable -> {
         Thread thread = new Thread(runnable);
         thread.setDaemon(true);
         return thread;
     });
 
-    private static final Map<Alarme, ScheduledFuture<?>> alarmesAgendados = new HashMap<>();
+    private static final Map<Alarme, ScheduledFuture<?>> alarmesAgendados = new ConcurrentHashMap<>();
 
     public static void agendarAlarmes(Tarefa tarefa) {
         if (tarefa == null || tarefa.getAlarmes() == null) {
@@ -48,9 +51,9 @@ public class AlarmeService {
         cancelarAlarme(alarme);
 
         ScheduledFuture<?> future = scheduler.schedule(() -> {
-            System.out.println("Alarme disparado para a tarefa: " + tarefa.getNome() + " - " + alarme);
-            alarme.setAtivo(false);
+            dispararAlarme(tarefa, alarme);
         }, atraso, TimeUnit.MILLISECONDS);
+
         alarmesAgendados.put(alarme, future);
     }
 
@@ -72,5 +75,19 @@ public class AlarmeService {
         for (Alarme alarme : tarefa.getAlarmes()) {
             cancelarAlarme(alarme);
         }
+    }
+
+    private static void dispararAlarme(Tarefa tarefa, Alarme alarme) {
+        alarme.setAtivo(false);
+        String dataFormatada = (tarefa.getDataTermino() != null)
+                ? tarefa.getDataTermino().format(FORMATTER)
+                : "sem data";
+
+        System.out.println("\n\n========================================");
+        System.out.println("[ALARME DISPARADO]");
+        System.out.println("Tarefa: " + tarefa.getNome());
+        System.out.println("Aviso: " + alarme + " do término (" + dataFormatada + ")");
+        System.out.println("========================================");
+        System.out.print("\n> ");
     }
 }

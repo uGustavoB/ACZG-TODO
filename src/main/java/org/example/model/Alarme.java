@@ -1,8 +1,6 @@
 package org.example.model;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 
 public class Alarme {
     private int minutosAntecedencia;
@@ -29,6 +27,13 @@ public class Alarme {
         this.minutosAntecedencia = minutosAntecedencia;
     }
 
+    public LocalDateTime calcularDataHoraDisparo(LocalDateTime dataTermino) {
+        if (dataTermino == null) {
+            return null;
+        }
+        return dataTermino.minusMinutes(minutosAntecedencia);
+    }
+
     @Override
     public String toString() {
         if (minutosAntecedencia >= 1440 && minutosAntecedencia % 1440 == 0) {
@@ -37,12 +42,5 @@ public class Alarme {
             return (minutosAntecedencia / 60) + " hora(s) antes";
         }
         return minutosAntecedencia + " min antes";
-    }
-
-    public LocalDateTime calcularDataHoraDisparo(LocalDate dataTermino) {
-        if (dataTermino == null) {
-            return null;
-        }
-        return dataTermino.atTime(LocalTime.of(23, 59)).minusMinutes(minutosAntecedencia);
     }
 }

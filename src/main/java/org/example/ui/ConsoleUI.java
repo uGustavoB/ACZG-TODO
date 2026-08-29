@@ -1,6 +1,7 @@
 package org.example.ui;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.Scanner;
@@ -9,6 +10,8 @@ public class ConsoleUI {
     private static final Scanner scanner = new Scanner(System.in);
     private static final String DATE_PATTERN = "dd/MM/yyyy";
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern(DATE_PATTERN);
+    private static final String DATE_TIME_PATTERN = "dd/MM/yyyy HH:mm";
+    private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern(DATE_TIME_PATTERN);
 
     public static void imprimirCabecalho(String titulo) {
         System.out.println("\n========================================");
@@ -95,6 +98,31 @@ public class ConsoleUI {
                 return LocalDate.parse(entrada, DATE_FORMATTER);
             } catch (DateTimeParseException e) {
                 System.out.println("Data inválida. Use o formato " + DATE_PATTERN + ".");
+            }
+        }
+    }
+
+    public static LocalDateTime lerDataHora(String mensagem) {
+        return lerDataHora(mensagem, false);
+    }
+
+    public static LocalDateTime lerDataHora(String mensagem, boolean permiteVazio) {
+        while (true) {
+            String entrada = lerTexto(mensagem, permiteVazio);
+
+            if (permiteVazio && (entrada == null || entrada.trim().isEmpty())) {
+                return null;
+            }
+
+            try {
+                if (entrada.contains(":")) {
+                    return LocalDateTime.parse(entrada.trim(), DATE_TIME_FORMATTER);
+                } else {
+                    LocalDate data = LocalDate.parse(entrada.trim(), DATE_FORMATTER);
+                    return data.atTime(23, 59);
+                }
+            } catch (DateTimeParseException e) {
+                System.out.println("Data/Hora inválida. Use o formato " + DATE_TIME_PATTERN + " ou " + DATE_PATTERN + ".");
             }
         }
     }

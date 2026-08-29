@@ -5,7 +5,7 @@ import org.example.model.Tarefa;
 import org.example.model.TarefaStatus;
 import org.example.ui.ConsoleUI;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Comparator;
 import java.util.List;
@@ -18,22 +18,17 @@ public class TarefaService {
         ConsoleUI.imprimirCabecalho("Adicionar Nova Tarefa");
 
         String nome = ConsoleUI.lerTexto("Nome: ");
-
         String descricao = ConsoleUI.lerTexto("Descrição: ");
-
-        LocalDate dataTermino = ConsoleUI.lerData("Data de Término (dd/mm/aaaa): ");
-
+        LocalDateTime dataTermino = ConsoleUI.lerDataHora("Data e Hora de Término (dd/MM/yyyy HH:mm): ");
         int prioridade = ConsoleUI.lerEscolha("Prioridade (1 a 5): ", 1, 5);
-
         String categoria = ConsoleUI.lerTexto("Categoria: ");
-
         TarefaStatus status = ConsoleUI.lerEnum("Status", TarefaStatus.class);
 
         Tarefa novaTarefa = new Tarefa(nome, descricao, dataTermino, prioridade, categoria, status);
 
         boolean querAlarme = ConsoleUI.lerConfirmacao("Deseja configurar alarmes para esta tarefa?");
         while (querAlarme) {
-            int minutos = ConsoleUI.lerEscolha("Antecedência em minutos (ex: 30 para 30min, 1440 para 1 dia): ", 1, 43200);
+            int minutos = ConsoleUI.lerEscolha("Antecedência em minutos antes do término (ex: 1, 5, 30, 60, 1440): ", 1, 43200);
             novaTarefa.adicionarAlarme(new Alarme(minutos));
             querAlarme = ConsoleUI.lerConfirmacao("Deseja adicionar outro alarme para esta mesma tarefa?");
         }
@@ -185,7 +180,7 @@ public class TarefaService {
             tarefa.setDescricao(novaDescricao);
         }
 
-        LocalDate novaData = ConsoleUI.lerData("Data de Término (dd/mm/aaaa) [" + tarefa.getDataTermino().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")) + "]: ", true);
+        LocalDateTime novaData = ConsoleUI.lerDataHora("Data e Hora de Término (dd/MM/yyyy HH:mm) [" + tarefa.getDataTermino().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")) + "]: ", true);
         if (novaData != null) {
             tarefa.setDataTermino(novaData);
         }

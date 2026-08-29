@@ -1,37 +1,32 @@
 package org.example.model;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class Tarefa {
     private String nome;
     private String descricao;
-    private LocalDate dataTermino;
+    private LocalDateTime dataTermino;
     private int prioridade;
     private String categoria;
     private TarefaStatus status;
     private List<Alarme> alarmes;
 
-    public Tarefa(String nome, String descricao, LocalDate dataTermino, int prioridade, String categoria, TarefaStatus status, List<Alarme> alarmes) {
+    public Tarefa(String nome, String descricao, LocalDateTime dataTermino, int prioridade, String categoria, TarefaStatus status, List<Alarme> alarmes) {
         this.nome = nome;
         this.descricao = descricao;
         this.dataTermino = dataTermino;
         this.prioridade = prioridade;
         this.categoria = categoria;
-        this.alarmes = alarmes;
+        this.alarmes = (alarmes != null) ? alarmes : new ArrayList<>();
         this.status = status;
     }
 
-    public Tarefa(String nome, String descricao, LocalDate dataTermino, int prioridade, String categoria, TarefaStatus status) {
-        this.nome = nome;
-        this.descricao = descricao;
-        this.dataTermino = dataTermino;
-        this.prioridade = prioridade;
-        this.categoria = categoria;
-        this.status = status;
-        this.alarmes = new ArrayList<>();
+    public Tarefa(String nome, String descricao, LocalDateTime dataTermino, int prioridade, String categoria, TarefaStatus status) {
+        this(nome, descricao, dataTermino, prioridade, categoria, status, new ArrayList<>());
     }
 
     public TarefaStatus getStatus() {
@@ -58,11 +53,11 @@ public class Tarefa {
         this.prioridade = prioridade;
     }
 
-    public LocalDate getDataTermino() {
+    public LocalDateTime getDataTermino() {
         return dataTermino;
     }
 
-    public void setDataTermino(LocalDate dataTermino) {
+    public void setDataTermino(LocalDateTime dataTermino) {
         this.dataTermino = dataTermino;
     }
 
@@ -87,18 +82,22 @@ public class Tarefa {
     }
 
     public void setAlarmes(List<Alarme> alarmes) {
-        this.alarmes = alarmes;
-    }
-
-    @Override
-    public String toString() {
-        return String.format("[%s] %s | Prioridade: %d | Categoria: %s | Prazo: %s",
-                status, nome, prioridade, categoria, dataTermino.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
+        this.alarmes = (alarmes != null) ? alarmes : new ArrayList<>();
     }
 
     public void adicionarAlarme(Alarme alarme) {
         if (alarme != null) {
             alarmes.add(alarme);
         }
+    }
+
+    @Override
+    public String toString() {
+        String infoAlarmes = "";
+        if (alarmes != null && !alarmes.isEmpty()) {
+            infoAlarmes = " | Alarmes: [" + alarmes.stream().map(Alarme::toString).collect(Collectors.joining(", ")) + "]";
+        }
+        return String.format("[%s] %s | Prioridade: %d | Categoria: %s | Prazo: %s%s",
+                status, nome, prioridade, categoria, dataTermino.format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")), infoAlarmes);
     }
 }
