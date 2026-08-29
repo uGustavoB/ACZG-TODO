@@ -41,3 +41,7 @@ bin/
 
 ### Mac OS ###
 .DS_Store
+
+### Dados da aplicação ###
+tarefas.csv
+*.csv
