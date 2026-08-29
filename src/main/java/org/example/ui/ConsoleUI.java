@@ -139,4 +139,13 @@ public class ConsoleUI {
 
         return lerEscolha("Sua escolha: ", 1, 5);
     }
+
+    public static int pedirOpcaoFiltro() {
+        System.out.println("1 - Todas as tarefas");
+        System.out.println("2 - Filtrar por Categoria");
+        System.out.println("3 - Filtrar por Prioridade");
+        System.out.println("4 - Filtrar por Status");
+
+        return lerEscolha("Como deseja listar? ", 1, 4);
+    }
 }

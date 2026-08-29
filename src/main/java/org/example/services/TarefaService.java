@@ -8,11 +8,9 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Scanner;
 import java.util.stream.Collectors;
 
 public class TarefaService {
-    private static final Scanner scanner = new Scanner(System.in);
 
     public static void adicionarTarefa(List<Tarefa> tarefas) {
         ConsoleUI.limparTela();
@@ -36,44 +34,80 @@ public class TarefaService {
         tarefas.sort(Comparator.comparingInt(Tarefa::getPrioridade).reversed());
         CsvService.salvarTarefas(tarefas);
 
-        System.out.println("Tarefa adicionada com sucesso!");
+        ConsoleUI.imprimirMensagem("Tarefa adicionada com sucesso!");
     }
 
     public static void exibirMenuListagem(List<Tarefa> tarefas) {
         ConsoleUI.limparTela();
         ConsoleUI.imprimirCabecalho("Filtros de Listagem");
 
-        if (tarefas.isEmpty()) {
+        if (tarefas == null || tarefas.isEmpty()) {
             ConsoleUI.imprimirMensagem("Nenhuma tarefa cadastrada.");
             return;
         }
 
-        System.out.println("1 - Todas as tarefas");
-        System.out.println("2 - Filtrar por Categoria");
-        System.out.println("3 - Filtrar por Prioridade");
-        System.out.println("4 - Filtrar por Status");
-        
-        int opcao = ConsoleUI.lerEscolha("Como deseja listar? ", 1, 4);
+        int opcao = ConsoleUI.pedirOpcaoFiltro();
+        List<Tarefa> tarefasFiltradas = processarFiltro(tarefas, opcao);
 
-        List<Tarefa> tarefasFiltradas = tarefas;
+        exibirTarefasFiltradas(tarefas, tarefasFiltradas, opcao);
+    }
 
-        if (opcao == 2) {
-            String categoria = ConsoleUI.lerTexto("Digite a categoria: ");
-            tarefasFiltradas = tarefas.stream()
-                    .filter(t -> t.getCategoria().equalsIgnoreCase(categoria))
-                    .collect(Collectors.toList());
-        } else if (opcao == 3) {
-            int prioridade = ConsoleUI.lerEscolha("Digite a prioridade (1 a 5): ", 1, 5);
-            tarefasFiltradas = tarefas.stream()
-                    .filter(t -> t.getPrioridade() == prioridade)
-                    .collect(Collectors.toList());
-        } else if (opcao == 4) {
-            TarefaStatus status = ConsoleUI.lerEnum("Escolha o Status", TarefaStatus.class);
-            tarefasFiltradas = tarefas.stream()
-                    .filter(t -> t.getStatus() == status)
-                    .collect(Collectors.toList());
+    public static List<Tarefa> filtrarPorCategoria(List<Tarefa> tarefas, String categoria) {
+        if (tarefas == null || categoria == null) {
+            return List.of();
         }
+        String categoriaBuscada = categoria.trim();
+        return tarefas.stream()
+                .filter(t -> t.getCategoria() != null && t.getCategoria().trim().equalsIgnoreCase(categoriaBuscada))
+                .collect(Collectors.toList());
+    }
 
+    public static List<Tarefa> filtrarPorPrioridade(List<Tarefa> tarefas, int prioridade) {
+        if (tarefas == null) {
+            return List.of();
+        }
+        return tarefas.stream()
+                .filter(t -> t.getPrioridade() == prioridade)
+                .collect(Collectors.toList());
+    }
+
+    public static List<Tarefa> filtrarPorStatus(List<Tarefa> tarefas, TarefaStatus status) {
+        if (tarefas == null || status == null) {
+            return List.of();
+        }
+        return tarefas.stream()
+                .filter(t -> t.getStatus() == status)
+                .collect(Collectors.toList());
+    }
+
+    public static long contarPorStatus(List<Tarefa> tarefas, TarefaStatus status) {
+        if (tarefas == null || status == null) {
+            return 0;
+        }
+        return tarefas.stream()
+                .filter(t -> t.getStatus() == status)
+                .count();
+    }
+
+    private static List<Tarefa> processarFiltro(List<Tarefa> tarefas, int opcao) {
+        return switch (opcao) {
+            case 2 -> {
+                String categoria = ConsoleUI.lerTexto("Digite a categoria: ");
+                yield filtrarPorCategoria(tarefas, categoria);
+            }
+            case 3 -> {
+                int prioridade = ConsoleUI.lerEscolha("Digite a prioridade (1 a 5): ", 1, 5);
+                yield filtrarPorPrioridade(tarefas, prioridade);
+            }
+            case 4 -> {
+                TarefaStatus status = ConsoleUI.lerEnum("Escolha o Status", TarefaStatus.class);
+                yield filtrarPorStatus(tarefas, status);
+            }
+            default -> tarefas;
+        };
+    }
+
+    private static void exibirTarefasFiltradas(List<Tarefa> tarefasOriginais, List<Tarefa> tarefasFiltradas, int opcao) {
         ConsoleUI.limparTela();
         ConsoleUI.imprimirCabecalho("Lista de Tarefas");
 
@@ -87,17 +121,21 @@ public class TarefaService {
         }
 
         if (opcao == 1) {
-            long concluidas = tarefas.stream().filter(t -> t.getStatus() == TarefaStatus.DONE).count();
-            long aFazer = tarefas.stream().filter(t -> t.getStatus() == TarefaStatus.TODO).count();
-            long emAndamento = tarefas.stream().filter(t -> t.getStatus() == TarefaStatus.DOING).count();
-
-            System.out.println("\n----------------------------------------");
-            System.out.println("Resumo das Tarefas:");
-            System.out.println("Total cadastradas: " + tarefas.size());
-            System.out.println("Para fazer (TODO): " + aFazer);
-            System.out.println("Sendo feitas (DOING): " + emAndamento);
-            System.out.println("Concluídas (DONE): " + concluidas);
+            exibirResumoTarefas(tarefasOriginais);
         }
+    }
+
+    private static void exibirResumoTarefas(List<Tarefa> tarefas) {
+        long concluidas = contarPorStatus(tarefas, TarefaStatus.DONE);
+        long aFazer = contarPorStatus(tarefas, TarefaStatus.TODO);
+        long emAndamento = contarPorStatus(tarefas, TarefaStatus.DOING);
+
+        System.out.println("\n----------------------------------------");
+        System.out.println("Resumo das Tarefas:");
+        System.out.println("Total cadastradas: " + tarefas.size());
+        System.out.println("Para fazer (TODO): " + aFazer);
+        System.out.println("Sendo feitas (DOING): " + emAndamento);
+        System.out.println("Concluídas (DONE): " + concluidas);
     }
 
     public static void listarTarefas(List<Tarefa> tarefas) {
