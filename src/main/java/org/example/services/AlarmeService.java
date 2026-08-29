@@ -2,10 +2,13 @@ package org.example.services;
 
 import org.example.model.Alarme;
 import org.example.model.Tarefa;
+import org.example.model.TarefaStatus;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
@@ -23,6 +26,62 @@ public class AlarmeService {
     });
 
     private static final Map<Alarme, ScheduledFuture<?>> alarmesAgendados = new ConcurrentHashMap<>();
+
+    public static void verificarAlarmesIniciais(List<Tarefa> tarefas) {
+        if (tarefas == null || tarefas.isEmpty()) {
+            return;
+        }
+
+        LocalDateTime agora = LocalDateTime.now();
+        List<String> avisos = new ArrayList<>();
+        boolean houveDisparo = false;
+
+        for (Tarefa tarefa : tarefas) {
+            if (tarefa.getStatus() == TarefaStatus.DONE || tarefa.getAlarmes() == null) {
+                continue;
+            }
+
+            for (Alarme alarme : tarefa.getAlarmes()) {
+                if (!alarme.isAtivo()) {
+                    continue;
+                }
+
+                LocalDateTime disparo = alarme.calcularDataHoraDisparo(tarefa.getDataTermino());
+                if (disparo == null) {
+                    continue;
+                }
+
+                if (!agora.isBefore(disparo) && agora.isBefore(tarefa.getDataTermino())) {
+                    alarme.setAtivo(false);
+                    houveDisparo = true;
+                    avisos.add(String.format("Tarefa: '%s' | Prazo: %s (%s) | Prioridade: %d | Categoria: %s",
+                            tarefa.getNome(),
+                            tarefa.getDataTermino().format(FORMATTER),
+                            alarme.toString(),
+                            tarefa.getPrioridade(),
+                            tarefa.getCategoria()));
+                } else if (agora.isBefore(disparo)) {
+                    agendarAlarme(tarefa, alarme);
+                }
+            }
+        }
+
+        if (!avisos.isEmpty()) {
+            SomService.tocar("sons/alarme.wav");
+
+            System.out.println("\n========================================");
+            System.out.println("🚨 [ALERTA DE TAREFAS PRÓXIMAS DO PRAZO] 🚨");
+            System.out.println("Você possui tarefa(s) no período de antecedência:");
+            for (String aviso : avisos) {
+                System.out.println(" • " + aviso);
+            }
+            System.out.println("========================================");
+        }
+
+        if (houveDisparo) {
+            CsvService.salvarTarefas(tarefas);
+        }
+    }
 
     public static void agendarAlarmes(Tarefa tarefa) {
         if (tarefa == null || tarefa.getAlarmes() == null) {
@@ -86,7 +145,7 @@ public class AlarmeService {
         SomService.tocar("sons/alarme.wav");
 
         System.out.println("\n\n========================================");
-        System.out.println("[ALARME DISPARADO]");
+        System.out.println("🔔 [ALARME DISPARADO] 🔔");
         System.out.println("Tarefa: " + tarefa.getNome());
         System.out.println("Aviso: " + alarme + " do término (" + dataFormatada + ")");
         System.out.println("========================================");

@@ -1,7 +1,6 @@
 package org.example;
 
 import org.example.model.Tarefa;
-import org.example.model.TarefaStatus;
 import org.example.services.AlarmeService;
 import org.example.services.CsvService;
 import org.example.services.TarefaService;
@@ -16,19 +15,14 @@ public class Main {
         boolean executando = true;
         tarefas = CsvService.carregarTarefas();
 
-        for (Tarefa tarefa : tarefas) {
-            if (tarefa.getStatus() != TarefaStatus.DONE) {
-                AlarmeService.agendarAlarmes(tarefa);
-            }
-        }
+        ConsoleUI.limparTela();
+        ConsoleUI.imprimirCabecalho("ACZG - TODO List");
+        ConsoleUI.imprimirMensagem("Bem-vindo ao ACZG - TODO List!");
+        ConsoleUI.imprimirMensagem("Crie e gerencie suas tarefas de forma eficiente.");
+
+        AlarmeService.verificarAlarmesIniciais(tarefas);
 
         while (executando) {
-            ConsoleUI.limparTela();
-            ConsoleUI.imprimirCabecalho("ACZG - TODO List");
-
-            ConsoleUI.imprimirMensagem("Bem-vindo ao ACZG - TODO List!");
-            ConsoleUI.imprimirMensagem("Crie e gerencie suas tarefas de forma eficiente.");
-
             int opcao = ConsoleUI.pedirOpcaoPrincipal();
             switch (opcao) {
                 case 1:
