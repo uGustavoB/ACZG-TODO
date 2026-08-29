@@ -1,5 +1,6 @@
 package org.example.services;
 
+import org.example.model.Alarme;
 import org.example.model.Tarefa;
 import org.example.model.TarefaStatus;
 import org.example.ui.ConsoleUI;
@@ -29,7 +30,16 @@ public class TarefaService {
         TarefaStatus status = ConsoleUI.lerEnum("Status", TarefaStatus.class);
 
         Tarefa novaTarefa = new Tarefa(nome, descricao, dataTermino, prioridade, categoria, status);
+
+        boolean querAlarme = ConsoleUI.lerConfirmacao("Deseja configurar alarmes para esta tarefa?");
+        while (querAlarme) {
+            int minutos = ConsoleUI.lerEscolha("Antecedência em minutos (ex: 30 para 30min, 1440 para 1 dia): ", 1, 43200);
+            novaTarefa.adicionarAlarme(new Alarme(minutos));
+            querAlarme = ConsoleUI.lerConfirmacao("Deseja adicionar outro alarme para esta mesma tarefa?");
+        }
+
         tarefas.add(novaTarefa);
+        AlarmeService.agendarAlarmes(novaTarefa);
 
         tarefas.sort(Comparator.comparingInt(Tarefa::getPrioridade).reversed());
         CsvService.salvarTarefas(tarefas);
@@ -195,6 +205,13 @@ public class TarefaService {
             tarefa.setStatus(novoStatus);
         }
 
+        if (tarefa.getStatus() == TarefaStatus.DONE) {
+            AlarmeService.cancelarAlarmes(tarefa);
+        } else {
+            AlarmeService.cancelarAlarmes(tarefa);
+            AlarmeService.agendarAlarmes(tarefa);
+        }
+
         tarefas.sort(Comparator.comparingInt(Tarefa::getPrioridade).reversed());
         CsvService.salvarTarefas(tarefas);
 
@@ -210,7 +227,8 @@ public class TarefaService {
 
         int indice = ConsoleUI.lerEscolha("Escolha o número da tarefa para deletar: ", 1, tarefas.size()) - 1;
         Tarefa tarefaRemovida = tarefas.remove(indice);
-        
+
+        AlarmeService.cancelarAlarmes(tarefaRemovida);
         CsvService.salvarTarefas(tarefas);
 
         System.out.println("Tarefa '" + tarefaRemovida.getNome() + "' deletada com sucesso!");

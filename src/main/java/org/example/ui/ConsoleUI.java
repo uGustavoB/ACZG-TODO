@@ -121,6 +121,21 @@ public class ConsoleUI {
         return valores[opcao - 1];
     }
 
+    public static boolean lerConfirmacao(String mensagem) {
+        while (true) {
+            System.out.print(mensagem + " (S/N): ");
+            String entrada = scanner.nextLine().trim().toLowerCase();
+
+            if (entrada.equals("s") || entrada.equals("sim")) {
+                return true;
+            } else if (entrada.equals("n") || entrada.equals("nao") || entrada.equals("não")) {
+                return false;
+            } else {
+                System.out.println("Entrada inválida. Digite 'S' para sim ou 'N' para não.");
+            }
+        }
+    }
+
     public static int pedirOpcaoPrincipal() {
         System.out.println("\nEscolha uma ação:");
         System.out.println("1 - Gerenciar tarefas");

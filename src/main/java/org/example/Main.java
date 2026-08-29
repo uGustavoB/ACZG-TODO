@@ -1,6 +1,8 @@
 package org.example;
 
 import org.example.model.Tarefa;
+import org.example.model.TarefaStatus;
+import org.example.services.AlarmeService;
 import org.example.services.CsvService;
 import org.example.services.TarefaService;
 import org.example.ui.ConsoleUI;
@@ -13,6 +15,12 @@ public class Main {
     public static void main(String[] args) {
         boolean executando = true;
         tarefas = CsvService.carregarTarefas();
+
+        for (Tarefa tarefa : tarefas) {
+            if (tarefa.getStatus() != TarefaStatus.DONE) {
+                AlarmeService.agendarAlarmes(tarefa);
+            }
+        }
 
         while (executando) {
             ConsoleUI.limparTela();
