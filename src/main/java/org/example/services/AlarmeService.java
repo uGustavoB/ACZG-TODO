@@ -83,6 +83,8 @@ public class AlarmeService {
                 ? tarefa.getDataTermino().format(FORMATTER)
                 : "sem data";
 
+        SomService.tocar("sons/alarme.wav");
+
         System.out.println("\n\n========================================");
         System.out.println("[ALARME DISPARADO]");
         System.out.println("Tarefa: " + tarefa.getNome());
