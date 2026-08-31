@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Gerenciador de Tarefas</title>
+</head>
+<body>
+    <h1>Gerenciador de Tarefas</h1>
+
+    <h2>Cadastrar / Editar Tarefa</h2>
+    <form id="formularioTarefa">
+        <div>
+            <label for="nome">Nome:</label>
+            <input type="text" id="nome" required>
+        </div>
+        <div>
+            <label for="descricao">Descrição:</label>
+            <input type="text" id="descricao" required>
+        </div>
+        <div>
+            <label for="dataTermino">Data e Hora de Término:</label>
+            <input type="datetime-local" id="dataTermino" required>
+        </div>
+        <div>
+            <label for="prioridade">Prioridade:</label>
+            <select id="prioridade" required>
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+                <option value="5">5</option>
+            </select>
+        </div>
+        <div>
+            <label for="categoria">Categoria:</label>
+            <input type="text" id="categoria" required>
+        </div>
+        <div>
+            <label for="status">Status:</label>
+            <select id="status" required>
+                <option value="TODO">TODO</option>
+                <option value="DOING">DOING</option>
+                <option value="DONE">DONE</option>
+            </select>
+        </div>
+        <button type="submit" id="botaoSalvar">Salvar Tarefa</button>
+        <button type="button" id="botaoCancelar" style="display: none;">Cancelar Edição</button>
+    </form>
+
+    <hr>
+
+    <h2>Filtro</h2>
+    <div>
+        <label for="filtroStatus">Status:</label>
+        <select id="filtroStatus">
+            <option value="">Todos</option>
+            <option value="TODO">TODO</option>
+            <option value="DOING">DOING</option>
+            <option value="DONE">DONE</option>
+        </select>
+
+        <button type="button" id="botaoLimparFiltros">Limpar Filtro</button>
+    </div>
+
+    <hr>
+
+    <h2>Lista de Tarefas</h2>
+    <table border="1" id="tabelaTarefas">
+        <thead>
+        <tr>
+            <th>Nome</th>
+            <th>Descrição</th>
+            <th>Término</th>
+            <th>Prioridade</th>
+            <th>Categoria</th>
+            <th>Status</th>
+            <th>Ações</th>
+        </tr>
+        </thead>
+        <tbody id="corpoTabelaTarefas">
+        </tbody>
+    </table>
+
+    <script src="js/app.js"></script>
+</body>
+</html>
