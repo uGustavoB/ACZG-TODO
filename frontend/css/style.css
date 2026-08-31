@@ -1,0 +1,172 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, Helvetica, sans-serif;
+    background-color: #f4f6f9;
+    color: #333;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 30px 15px;
+    gap: 20px;
+}
+
+h1 {
+    color: #2c3e50;
+    text-align: center;
+}
+
+h2 {
+    color: #34495e;
+    font-size: 1.2rem;
+    width: 100%;
+    max-width: 900px;
+}
+
+hr {
+    width: 100%;
+    max-width: 900px;
+    border: none;
+    border-top: 1px solid #ddd;
+}
+
+#formularioTarefa {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    background-color: #ffffff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    width: 100%;
+    max-width: 900px;
+}
+
+#formularioTarefa div {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+label {
+    font-weight: bold;
+    font-size: 0.9rem;
+    color: #495057;
+}
+
+input, select {
+    padding: 10px;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    font-size: 0.95rem;
+    outline: none;
+}
+
+input:focus, select:focus {
+    border-color: #007bff;
+}
+
+button {
+    cursor: pointer;
+    padding: 10px 16px;
+    border: none;
+    border-radius: 4px;
+    font-size: 0.95rem;
+    font-weight: bold;
+    transition: background-color 0.2s;
+}
+
+#botaoSalvar {
+    background-color: #007bff;
+    color: #ffffff;
+}
+
+#botaoSalvar:hover {
+    background-color: #0056b3;
+}
+
+#botaoCancelar {
+    background-color: #6c757d;
+    color: #ffffff;
+}
+
+#botaoCancelar:hover {
+    background-color: #545b62;
+}
+
+.conteiner-filtro {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background-color: #ffffff;
+    padding: 15px 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    width: 100%;
+    max-width: 900px;
+}
+
+#botaoLimparFiltros {
+    background-color: #e2e6ea;
+    color: #333;
+}
+
+#botaoLimparFiltros:hover {
+    background-color: #dae0e5;
+}
+
+#tabelaTarefas {
+    width: 100%;
+    max-width: 900px;
+    border-collapse: collapse;
+    background-color: #ffffff;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    border: none;
+}
+
+#tabelaTarefas th, #tabelaTarefas td {
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid #e9ecef;
+}
+
+#tabelaTarefas th {
+    background-color: #2c3e50;
+    color: #ffffff;
+    font-weight: 600;
+}
+
+#tabelaTarefas tr:hover {
+    background-color: #f8f9fa;
+}
+
+#tabelaTarefas td:last-child {
+    display: flex;
+    gap: 8px;
+}
+
+#tabelaTarefas td button:first-child {
+    background-color: #ffc107;
+    color: #212529;
+    padding: 6px 12px;
+}
+
+#tabelaTarefas td button:first-child:hover {
+    background-color: #e0a800;
+}
+
+#tabelaTarefas td button:last-child {
+    background-color: #dc3545;
+    color: #ffffff;
+    padding: 6px 12px;
+}
+
+#tabelaTarefas td button:last-child:hover {
+    background-color: #bd2130;
+}
