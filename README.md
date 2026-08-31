@@ -30,23 +30,30 @@ O sistema de alarmes permite acompanhar os prazos das tarefas de forma proativa:
 ## Estrutura do Projeto
 
 ```
-src/
-└── main/
-    └── java/
-        └── org/
-            └── example/
-                ├── Main.java              # Ponto de entrada da aplicação
-                ├── model/
-                │   ├── Alarme.java        # Entidade de Alarme (antecedência e estado)
-                │   ├── Tarefa.java        # Entidade de Tarefa
-                │   └── TarefaStatus.java  # Enumeração de Status (TODO, DOING, DONE)
-                ├── services/
-                │   ├── AlarmeService.java # Agendamento em background e verificação de alarmes
-                │   ├── CsvService.java    # Responsável pela persistência (I/O)
-                │   ├── SomService.java    # Execução de alertas sonoros
-                │   └── TarefaService.java # Lógica de negócios (adicionar, listar, editar, etc)
-                └── ui/
-                    └── ConsoleUI.java     # Gerenciamento de interface e leitura de inputs
+ACZG-TODO/
+├── frontend/
+│   ├── css/
+│   │   └── style.css          # Estilização e layout com Flexbox
+│   ├── js/
+│   │   └── app.js             # Lógica do CRUD e manipulação dinâmica do DOM
+│   └── index.html             # Interface web principal
+├── src/
+│   └── main/
+│       └── java/
+│           └── org/
+│               └── example/
+│                   ├── Main.java              # Ponto de entrada da aplicação Java
+│                   ├── model/
+│                   │   ├── Alarme.java        # Entidade de Alarme (antecedência e estado)
+│                   │   ├── Tarefa.java        # Entidade de Tarefa
+│                   │   └── TarefaStatus.java  # Enumeração de Status (TODO, DOING, DONE)
+│                   ├── services/
+│                   │   ├── AlarmeService.java # Agendamento em background e verificação de alarmes
+│                   │   ├── CsvService.java    # Responsável pela persistência (I/O)
+│                   │   ├── SomService.java    # Execução de alertas sonoros
+│                   │   └── TarefaService.java # Lógica de negócios (adicionar, listar, editar, etc)
+│                   └── ui/
+│                       └── ConsoleUI.java     # Gerenciamento de interface e leitura de inputs
 ```
 
 ---
@@ -64,6 +71,9 @@ src/
 | `SomService.java`    | Utilitário para reprodução de efeitos sonoros quando um alarme é disparado.                                                                    |
 | `TarefaService.java` | Concentra as regras de negócio: adiciona, atualiza, deleta, filtra e exibe o painel de estatísticas, além de fazer a ordenação por prioridade. |
 | `ConsoleUI.java`     | Centraliza as interações com o console: limpeza de tela, leitura formatada e segura de textos, números, datas/horas e *enums*.                 |
+| `index.html`         | Interface web com formulário para cadastro/edição, filtro por status e tabela de tarefas.                                                     |
+| `style.css`          | Estilização do front-end com Flexbox para estruturação responsiva e componentes limpos.                                                        |
+| `app.js`             | Controle dinâmico do front-end: manipulação de eventos, ordenação por prioridade e CRUD em memória.                                             |
 
 ---
 
@@ -83,13 +93,20 @@ src/
 
 ## Tecnologias
 
+### Backend
 - **Java**
 - **Gradle** (Gerenciador de dependências e build)
+
+### Frontend
+- **HTML5** (Estruturação semântica dos elementos e formulários)
+- **CSS3** (Estilização e layout responsivo utilizando Flexbox)
+- **JavaScript (ES6+)** (Manipulação do DOM e lógica de CRUD em memória)
 
 ---
 
 ## Como Executar
 
+### Backend (Console Java)
 1. Clone o repositório:
     ```bash
     git clone https://github.com/uGustavoB/ACZG-TODO.git
@@ -115,7 +132,8 @@ src/
     java -cp build/classes/java/main org.example.Main
     ```
 
-> Também é possível abrir o projeto diretamente no IntelliJ IDEA e executar a classe `Main.java`.
+### Frontend (Interface Web)
+- Abra diretamente o arquivo [`frontend/index.html`](frontend/index.html) no seu navegador preferido ou utilize a extensão **Live Server** no VS Code / IntelliJ IDEA.
 
 ---
 
