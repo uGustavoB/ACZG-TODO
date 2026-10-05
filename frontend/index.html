@@ -67,9 +67,20 @@
     <hr>
 
     <h2>Lista de Tarefas</h2>
+    <div class="conteiner-acoes-em-massa">
+        <label for="novoStatusMassa">Alterar status dos selecionados para:</label>
+        <select id="novoStatusMassa">
+            <option value="TODO">TODO</option>
+            <option value="DOING">DOING</option>
+            <option value="DONE">DONE</option>
+        </select>
+        <button type="button" id="botaoAplicarStatusMassa">Atualizar Selecionados</button>
+    </div>
+
     <table id="tabelaTarefas">
         <thead>
         <tr>
+            <th><input type="checkbox" id="selecionarTodas" title="Selecionar todas as tarefas"></th>
             <th>Nome</th>
             <th>Descrição</th>
             <th>Término</th>

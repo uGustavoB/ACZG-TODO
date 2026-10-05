@@ -1,4 +1,16 @@
-let tarefas = [];
+function carregarTarefas() {
+    try {
+        return JSON.parse(localStorage.getItem("tarefas")) || [];
+    } catch {
+        return [];
+    }
+}
+
+function salvarTarefas() {
+    localStorage.setItem("tarefas", JSON.stringify(tarefas));
+}
+
+let tarefas = carregarTarefas();
 let indiceEdicao = -1;
 
 const formularioTarefa = document.getElementById("formularioTarefa");
@@ -15,12 +27,19 @@ const filtroStatus = document.getElementById("filtroStatus");
 const botaoLimparFiltros = document.getElementById("botaoLimparFiltros");
 const corpoTabelaTarefas = document.getElementById("corpoTabelaTarefas");
 
+const novoStatusMassa = document.getElementById("novoStatusMassa");
+const botaoAplicarStatusMassa = document.getElementById("botaoAplicarStatusMassa");
+const selecionarTodas = document.getElementById("selecionarTodas");
+
 function ordenarTarefasPorPrioridade() {
     tarefas.sort((primeira, segunda) => segunda.prioridade - primeira.prioridade);
 }
 
 function renderizarTarefas() {
     corpoTabelaTarefas.innerHTML = "";
+    if (selecionarTodas) {
+        selecionarTodas.checked = false;
+    }
 
     const valorFiltroStatus = filtroStatus.value;
 
@@ -30,7 +49,7 @@ function renderizarTarefas() {
 
     if (tarefasFiltradas.length === 0) {
         const linhaVazia = document.createElement("tr");
-        linhaVazia.innerHTML = `<td colspan="7">Nenhuma tarefa encontrada.</td>`;
+        linhaVazia.innerHTML = `<td colspan="8">Nenhuma tarefa encontrada.</td>`;
         corpoTabelaTarefas.appendChild(linhaVazia);
         return;
     }
@@ -40,6 +59,7 @@ function renderizarTarefas() {
         const linha = document.createElement("tr");
 
         linha.innerHTML = `
+            <td><input type="checkbox" class="checkbox-tarefa" data-indice="${indiceReal}"></td>
             <td>${tarefa.nome}</td>
             <td>${tarefa.descricao}</td>
             <td>${tarefa.dataTermino}</td>
@@ -82,6 +102,7 @@ formularioTarefa.addEventListener("submit", function (evento) {
     }
 
     ordenarTarefasPorPrioridade();
+    salvarTarefas();
     limparFormulario();
     renderizarTarefas();
 });
@@ -106,6 +127,7 @@ function removerTarefa(indice) {
     const confirmar = confirm("Tem certeza que deseja excluir esta tarefa?");
     if (confirmar) {
         tarefas.splice(indice, 1);
+        salvarTarefas();
         if (indiceEdicao === indice) {
             limparFormulario();
         }
@@ -121,6 +143,43 @@ filtroStatus.addEventListener("change", renderizarTarefas);
 
 botaoLimparFiltros.addEventListener("click", function () {
     filtroStatus.value = "";
+    renderizarTarefas();
+});
+
+selecionarTodas.addEventListener("change", function () {
+    const checkboxes = document.querySelectorAll(".checkbox-tarefa");
+    checkboxes.forEach((cb) => {
+        cb.checked = selecionarTodas.checked;
+    });
+});
+
+corpoTabelaTarefas.addEventListener("change", function (evento) {
+    if (evento.target.classList.contains("checkbox-tarefa")) {
+        const checkboxes = document.querySelectorAll(".checkbox-tarefa");
+        const marcados = document.querySelectorAll(".checkbox-tarefa:checked");
+        selecionarTodas.checked = checkboxes.length > 0 && checkboxes.length === marcados.length;
+    }
+});
+
+botaoAplicarStatusMassa.addEventListener("click", function () {
+    const checkboxes = document.querySelectorAll(".checkbox-tarefa:checked");
+    if (checkboxes.length === 0) {
+        alert("Selecione ao menos uma tarefa para alterar o status.");
+        return;
+    }
+
+    const novoStatus = novoStatusMassa.value;
+    checkboxes.forEach((cb) => {
+        const indice = parseInt(cb.dataset.indice, 10);
+        if (tarefas[indice]) {
+            tarefas[indice].status = novoStatus;
+            if (indiceEdicao === indice) {
+                status.value = novoStatus;
+            }
+        }
+    });
+
+    salvarTarefas();
     renderizarTarefas();
 });
 

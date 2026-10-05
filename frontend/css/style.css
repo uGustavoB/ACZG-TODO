@@ -98,7 +98,8 @@ button {
     background-color: #545b62;
 }
 
-.conteiner-filtro {
+.conteiner-filtro,
+.conteiner-acoes-em-massa {
     display: flex;
     align-items: center;
     gap: 12px;
@@ -119,6 +120,15 @@ button {
     background-color: #dae0e5;
 }
 
+#botaoAplicarStatusMassa {
+    background-color: #28a745;
+    color: #ffffff;
+}
+
+#botaoAplicarStatusMassa:hover {
+    background-color: #218838;
+}
+
 #tabelaTarefas {
     width: 100%;
     max-width: 900px;
@@ -134,6 +144,12 @@ button {
     padding: 12px 15px;
     text-align: left;
     border-bottom: 1px solid #e9ecef;
+}
+
+#tabelaTarefas th:first-child,
+#tabelaTarefas td:first-child {
+    text-align: center;
+    width: 40px;
 }
 
 #tabelaTarefas th {
