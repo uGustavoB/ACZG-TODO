@@ -445,4 +445,88 @@ class TarefaServiceSpec extends Specification {
         then: "o total retornado deve ser zero sem lancar NullPointerException"
         total == 0L
     }
+
+    // ==========================================
+    // Exclusao de Tarefas (Delete)
+    // ==========================================
+
+    void "deve excluir tarefa em indice valido reduzindo a lista e retornando o elemento correto"() {
+        given: "uma lista com 2 tarefas: Tarefa 1 (indice 0) e Tarefa 2 (indice 1)"
+        Tarefa tarefa1 = criarTarefa("Tarefa 1", 3, "Trabalho", TarefaStatus.TODO)
+        Tarefa tarefa2 = criarTarefa("Tarefa 2", 2, "Estudos", TarefaStatus.TODO)
+        List<Tarefa> tarefas = new ArrayList<Tarefa>(List.of(tarefa1, tarefa2))
+
+        when: "a tarefa de indice 0 e removida"
+        Tarefa tarefaRemovida = TarefaService.removerTarefa(tarefas, 0)
+
+        then: "a tarefa retornada deve ser a Tarefa 1"
+        tarefaRemovida == tarefa1
+        tarefaRemovida.getNome() == "Tarefa 1"
+
+        and: "a lista deve conter apenas 1 tarefa restante sendo a Tarefa 2"
+        tarefas.size() == 1
+        tarefas.get(0) == tarefa2
+        !tarefas.contains(tarefa1)
+    }
+
+    void "deve excluir tarefa no final da lista quando o ultimo indice for informado"() {
+        given: "uma lista com 2 tarefas"
+        Tarefa tarefa1 = criarTarefa("Tarefa 1", 3, "Trabalho", TarefaStatus.TODO)
+        Tarefa tarefa2 = criarTarefa("Tarefa 2", 2, "Estudos", TarefaStatus.TODO)
+        List<Tarefa> tarefas = new ArrayList<Tarefa>(List.of(tarefa1, tarefa2))
+
+        when: "a tarefa do indice 1 (ultimo elemento) e removida"
+        Tarefa tarefaRemovida = TarefaService.removerTarefa(tarefas, 1)
+
+        then: "a tarefa retornada deve ser a Tarefa 2"
+        tarefaRemovida == tarefa2
+
+        and: "a lista deve restar apenas com a Tarefa 1"
+        tarefas.size() == 1
+        tarefas.get(0) == tarefa1
+    }
+
+    void "deve retornar null e nao alterar a lista ao tentar excluir sobre lista vazia"() {
+        given: "uma lista de tarefas vazia"
+        List<Tarefa> tarefasVazias = new ArrayList<Tarefa>()
+
+        when: "a operacao de remocao e acionada sobre a lista vazia"
+        Tarefa resultado = TarefaService.removerTarefa(tarefasVazias, 0)
+
+        then: "deve retornar null sem lancar excecao e a lista deve permanecer vazia"
+        resultado == null
+        tarefasVazias.isEmpty()
+        notThrown(Exception)
+    }
+
+    void "deve retornar null e nao alterar a lista ao tentar excluir com indice fora dos limites"() {
+        given: "uma lista com 1 tarefa"
+        Tarefa tarefa = criarTarefa("Tarefa Unica", 3, "Trabalho", TarefaStatus.TODO)
+        List<Tarefa> tarefas = new ArrayList<Tarefa>(List.of(tarefa))
+
+        when: "a remocao e tentada com indice negativo e com indice alem do limite"
+        Tarefa resultadoNegativo = TarefaService.removerTarefa(tarefas, -1)
+        Tarefa resultadoAlemLimite = TarefaService.removerTarefa(tarefas, 1)
+
+        then: "ambas as tentativas devem retornar null e nao lancar excecao"
+        resultadoNegativo == null
+        resultadoAlemLimite == null
+
+        and: "a lista deve permanecer com a tarefa original"
+        tarefas.size() == 1
+        tarefas.get(0) == tarefa
+        notThrown(IndexOutOfBoundsException)
+    }
+
+    void "deve retornar null e nao lancar excecao ao tentar excluir sobre lista nula"() {
+        given: "uma lista nula de tarefas"
+        List<Tarefa> tarefasNulas = null
+
+        when: "a remocao e tentada com a lista nula"
+        Tarefa resultado = TarefaService.removerTarefa(tarefasNulas, 0)
+
+        then: "deve retornar null sem disparar NullPointerException"
+        resultado == null
+        notThrown(NullPointerException)
+    }
 }
