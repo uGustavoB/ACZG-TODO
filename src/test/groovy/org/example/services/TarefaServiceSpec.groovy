@@ -5,6 +5,7 @@ import org.example.model.TarefaStatus
 import spock.lang.Specification
 
 import java.time.LocalDateTime
+import java.util.ArrayList
 import java.util.List
 
 class TarefaServiceSpec extends Specification {
@@ -18,6 +19,95 @@ class TarefaServiceSpec extends Specification {
                 categoria,
                 status
         )
+    }
+
+    // ==========================================
+    // Criacao de Tarefas (Create)
+    // ==========================================
+
+    void "deve adicionar tarefa com prioridade maior e posiciona-la no inicio da lista"() {
+        given: "uma lista de tarefas contendo uma tarefa com prioridade 2"
+        Tarefa tarefaPrioridade2 = criarTarefa("Tarefa Existente", 2, "Trabalho", TarefaStatus.TODO)
+        List<Tarefa> tarefas = new ArrayList<Tarefa>(List.of(tarefaPrioridade2))
+        Tarefa novaTarefa = criarTarefa("Tarefa Urgente", 5, "Trabalho", TarefaStatus.TODO)
+
+        when: "a nova tarefa de prioridade 5 e adicionada a lista"
+        TarefaService.adicionarTarefa(tarefas, novaTarefa)
+
+        then: "a lista deve conter 2 tarefas"
+        tarefas.size() == 2
+
+        and: "a tarefa de prioridade 5 deve estar no indice 0 e a de prioridade 2 no indice 1"
+        tarefas.get(0) == novaTarefa
+        tarefas.get(0).getPrioridade() == 5
+        tarefas.get(1) == tarefaPrioridade2
+        tarefas.get(1).getPrioridade() == 2
+    }
+
+    void "deve adicionar tarefa com prioridade menor e posiciona-la ao final da lista"() {
+        given: "uma lista contendo tarefas com prioridades 5 e 3"
+        Tarefa tarefaPrioridade5 = criarTarefa("Tarefa Alta", 5, "Trabalho", TarefaStatus.TODO)
+        Tarefa tarefaPrioridade3 = criarTarefa("Tarefa Media", 3, "Trabalho", TarefaStatus.TODO)
+        List<Tarefa> tarefas = new ArrayList<Tarefa>(List.of(tarefaPrioridade5, tarefaPrioridade3))
+        Tarefa novaTarefa = criarTarefa("Tarefa Baixa", 1, "Trabalho", TarefaStatus.TODO)
+
+        when: "a nova tarefa de prioridade 1 e adicionada a lista"
+        TarefaService.adicionarTarefa(tarefas, novaTarefa)
+
+        then: "a lista deve conter 3 tarefas"
+        tarefas.size() == 3
+
+        and: "a tarefa de prioridade 1 deve estar na ultima posicao da lista"
+        tarefas.get(2) == novaTarefa
+        tarefas.get(2).getPrioridade() == 1
+        tarefas.get(0) == tarefaPrioridade5
+        tarefas.get(1) == tarefaPrioridade3
+    }
+
+    void "deve adicionar tarefa com sucesso em uma lista inicialmente vazia"() {
+        given: "uma lista de tarefas vazia e uma nova tarefa valida"
+        List<Tarefa> tarefas = new ArrayList<Tarefa>()
+        Tarefa novaTarefa = criarTarefa("Primeira Tarefa", 3, "Estudos", TarefaStatus.TODO)
+
+        when: "a nova tarefa e adicionada a lista"
+        TarefaService.adicionarTarefa(tarefas, novaTarefa)
+
+        then: "a lista deve conter exatamente 1 tarefa"
+        tarefas.size() == 1
+
+        and: "a tarefa inserida deve corresponder a nova tarefa informada"
+        tarefas.get(0) == novaTarefa
+        tarefas.get(0).getNome() == "Primeira Tarefa"
+        tarefas.get(0).getPrioridade() == 3
+        tarefas.get(0).getCategoria() == "Estudos"
+        tarefas.get(0).getStatus() == TarefaStatus.TODO
+    }
+
+    void "nao deve lancar excecao ao tentar adicionar tarefa em lista nula"() {
+        given: "uma lista nula e uma nova tarefa valida"
+        List<Tarefa> tarefasNulas = null
+        Tarefa novaTarefa = criarTarefa("Tarefa Valida", 4, "Geral", TarefaStatus.TODO)
+
+        when: "o metodo adicionarTarefa e chamado com lista nula"
+        TarefaService.adicionarTarefa(tarefasNulas, novaTarefa)
+
+        then: "nenhuma excecao deve ser lancada"
+        notThrown(NullPointerException)
+    }
+
+    void "nao deve modificar a lista nem lancar excecao ao tentar adicionar tarefa nula"() {
+        given: "uma lista contendo uma tarefa existente e uma nova tarefa nula"
+        Tarefa tarefaExistente = criarTarefa("Tarefa Existente", 3, "Geral", TarefaStatus.TODO)
+        List<Tarefa> tarefas = new ArrayList<Tarefa>(List.of(tarefaExistente))
+        Tarefa novaTarefaNula = null
+
+        when: "o metodo adicionarTarefa e chamado com tarefa nula"
+        TarefaService.adicionarTarefa(tarefas, novaTarefaNula)
+
+        then: "nenhuma excecao deve ser lancada e a lista deve permanecer inalterada"
+        notThrown(NullPointerException)
+        tarefas.size() == 1
+        tarefas.get(0) == tarefaExistente
     }
 
     // ==========================================
