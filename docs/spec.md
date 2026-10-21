@@ -6,7 +6,7 @@
 O **ACZG-TODO** é uma aplicação de gerenciamento de tarefas com backend em Java (executado via console) e interface web. As regras de negócio do backend estão concentradas na classe `org.example.services.TarefaService`.
 
 ### Objetivo
-Definir a especificação da suíte de testes unitários automatizados para as operações de CRUD (Create, Read, Update, Delete) em `TarefaService`, utilizando o framework **Spock (Groovy)**. Os testes visam garantir o comportamento correto das regras de negócio existentes, mantendo isolamento de dependências externas (console, disco e agendador de alarmes).
+Definir a especificação da suíte de testes unitários automatizados para as operações de CRUD (Create, Read, Update, Delete) em `TarefaService`, utilizando o framework **Spock (Groovy)** com **tipagem estática** (sem tipagem dinâmica / sem `def`). Os testes visam garantir o comportamento correto das regras de negócio existentes, mantendo isolamento de dependências externas (console, disco e agendador de alarmes).
 
 ---
 
