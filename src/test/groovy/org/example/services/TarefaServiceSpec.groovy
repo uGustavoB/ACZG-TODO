@@ -1,0 +1,256 @@
+package org.example.services
+
+import org.example.model.Tarefa
+import org.example.model.TarefaStatus
+import spock.lang.Specification
+
+import java.time.LocalDateTime
+import java.util.List
+
+class TarefaServiceSpec extends Specification {
+
+    private Tarefa criarTarefa(String nome, int prioridade, String categoria, TarefaStatus status) {
+        return new Tarefa(
+                nome,
+                "Descrição padrão",
+                LocalDateTime.of(2026, 12, 31, 23, 59),
+                prioridade,
+                categoria,
+                status
+        )
+    }
+
+    // ==========================================
+    // Filtro por Categoria
+    // ==========================================
+
+    void "deve filtrar tarefas por categoria ignorando diferencas de case e espacos nas extremidades"() {
+        given: "uma lista de tarefas contendo categorias Trabalho, TRABALHO  e Estudos"
+        Tarefa tarefa1 = criarTarefa("Tarefa 1", 3, "Trabalho", TarefaStatus.TODO)
+        Tarefa tarefa2 = criarTarefa("Tarefa 2", 2, "TRABALHO ", TarefaStatus.DOING)
+        Tarefa tarefa3 = criarTarefa("Tarefa 3", 1, "Estudos", TarefaStatus.DONE)
+        List<Tarefa> tarefas = List.of(tarefa1, tarefa2, tarefa3)
+
+        when: "o filtro por categoria e executado com ' trabalho'"
+        List<Tarefa> resultado = TarefaService.filtrarPorCategoria(tarefas, " trabalho")
+
+        then: "o resultado deve conter apenas as tarefas da categoria informada"
+        resultado.size() == 2
+        resultado.contains(tarefa1)
+        resultado.contains(tarefa2)
+        !resultado.contains(tarefa3)
+    }
+
+    void "deve retornar lista vazia quando a categoria pesquisada nao for encontrada"() {
+        given: "uma lista de tarefas com categorias conhecidas"
+        Tarefa tarefa1 = criarTarefa("Tarefa 1", 3, "Trabalho", TarefaStatus.TODO)
+        List<Tarefa> tarefas = List.of(tarefa1)
+
+        when: "o filtro por categoria e executado para uma categoria inexistente"
+        List<Tarefa> resultado = TarefaService.filtrarPorCategoria(tarefas, "Lazer")
+
+        then: "o resultado deve ser uma lista vazia"
+        resultado.isEmpty()
+    }
+
+    void "deve retornar lista vazia ao filtrar por categoria quando a categoria for nula"() {
+        given: "uma lista de tarefas valida e uma categoria nula"
+        Tarefa tarefa1 = criarTarefa("Tarefa 1", 3, "Trabalho", TarefaStatus.TODO)
+        List<Tarefa> tarefas = List.of(tarefa1)
+        String categoriaNula = null
+
+        when: "o filtro por categoria e executado com categoria nula"
+        List<Tarefa> resultado = TarefaService.filtrarPorCategoria(tarefas, categoriaNula)
+
+        then: "deve retornar uma lista vazia sem lancar excecao"
+        resultado.isEmpty()
+    }
+
+    void "deve retornar lista vazia ao filtrar por categoria quando a lista de tarefas for nula"() {
+        given: "uma lista de tarefas nula"
+        List<Tarefa> tarefasNulas = null
+
+        when: "o filtro por categoria e executado"
+        List<Tarefa> resultado = TarefaService.filtrarPorCategoria(tarefasNulas, "Trabalho")
+
+        then: "deve retornar uma lista vazia sem lancar NullPointerException"
+        resultado.isEmpty()
+    }
+
+    void "deve ignorar tarefas que possuem categoria nula ao filtrar por categoria"() {
+        given: "uma lista contendo uma tarefa com categoria nula e outra com categoria valida"
+        Tarefa tarefaSemCategoria = criarTarefa("Tarefa Sem Categoria", 2, null, TarefaStatus.TODO)
+        Tarefa tarefaValida = criarTarefa("Tarefa Valida", 4, "Pessoal", TarefaStatus.TODO)
+        List<Tarefa> tarefas = List.of(tarefaSemCategoria, tarefaValida)
+
+        when: "o filtro por categoria e executado buscando 'Pessoal'"
+        List<Tarefa> resultado = TarefaService.filtrarPorCategoria(tarefas, "Pessoal")
+
+        then: "apenas a tarefa com categoria valida correspondente deve ser retornada"
+        resultado.size() == 1
+        resultado.contains(tarefaValida)
+        !resultado.contains(tarefaSemCategoria)
+    }
+
+    // ==========================================
+    // Filtro por Prioridade
+    // ==========================================
+
+    void "deve filtrar tarefas pela prioridade informada"() {
+        given: "uma lista com 3 tarefas de prioridades 1, 3 e 5"
+        Tarefa tarefaPrioridade1 = criarTarefa("Tarefa Baixa", 1, "Geral", TarefaStatus.TODO)
+        Tarefa tarefaPrioridade3 = criarTarefa("Tarefa Media", 3, "Geral", TarefaStatus.DOING)
+        Tarefa tarefaPrioridade5 = criarTarefa("Tarefa Alta", 5, "Geral", TarefaStatus.DONE)
+        List<Tarefa> tarefas = List.of(tarefaPrioridade1, tarefaPrioridade3, tarefaPrioridade5)
+
+        when: "o filtro por prioridade e executado para o valor 3"
+        List<Tarefa> resultado = TarefaService.filtrarPorPrioridade(tarefas, 3)
+
+        then: "o resultado deve conter apenas a tarefa com prioridade 3"
+        resultado.size() == 1
+        resultado.get(0).getPrioridade() == 3
+        resultado.contains(tarefaPrioridade3)
+    }
+
+    void "deve retornar lista vazia quando nenhuma tarefa possuir a prioridade buscada"() {
+        given: "uma lista de tarefas com prioridades 1 e 5"
+        Tarefa tarefa1 = criarTarefa("Tarefa 1", 1, "Geral", TarefaStatus.TODO)
+        Tarefa tarefa5 = criarTarefa("Tarefa 5", 5, "Geral", TarefaStatus.DONE)
+        List<Tarefa> tarefas = List.of(tarefa1, tarefa5)
+
+        when: "o filtro por prioridade e executado para a prioridade 2"
+        List<Tarefa> resultado = TarefaService.filtrarPorPrioridade(tarefas, 2)
+
+        then: "o resultado deve ser uma lista vazia"
+        resultado.isEmpty()
+    }
+
+    void "deve retornar lista vazia ao filtrar por prioridade quando a lista de tarefas for nula"() {
+        given: "uma lista de tarefas nula"
+        List<Tarefa> tarefasNulas = null
+
+        when: "o filtro por prioridade e executado"
+        List<Tarefa> resultado = TarefaService.filtrarPorPrioridade(tarefasNulas, 3)
+
+        then: "deve retornar uma lista vazia sem lancar NullPointerException"
+        resultado.isEmpty()
+    }
+
+    // ==========================================
+    // Filtro por Status
+    // ==========================================
+
+    void "deve filtrar tarefas pelo status correspondente"() {
+        given: "uma lista contendo tarefas nos status TODO, DOING e DONE"
+        Tarefa tarefaTodo = criarTarefa("Tarefa TODO", 2, "Geral", TarefaStatus.TODO)
+        Tarefa tarefaDoing1 = criarTarefa("Tarefa DOING 1", 3, "Geral", TarefaStatus.DOING)
+        Tarefa tarefaDoing2 = criarTarefa("Tarefa DOING 2", 4, "Geral", TarefaStatus.DOING)
+        Tarefa tarefaDone = criarTarefa("Tarefa DONE", 5, "Geral", TarefaStatus.DONE)
+        List<Tarefa> tarefas = List.of(tarefaTodo, tarefaDoing1, tarefaDoing2, tarefaDone)
+
+        when: "o filtro por status e executado para TarefaStatus.DOING"
+        List<Tarefa> resultado = TarefaService.filtrarPorStatus(tarefas, TarefaStatus.DOING)
+
+        then: "apenas as tarefas com status DOING devem ser retornadas"
+        resultado.size() == 2
+        resultado.contains(tarefaDoing1)
+        resultado.contains(tarefaDoing2)
+        !resultado.contains(tarefaTodo)
+        !resultado.contains(tarefaDone)
+    }
+
+    void "deve retornar lista vazia quando nenhuma tarefa possuir o status buscado"() {
+        given: "uma lista contendo tarefas apenas com status TODO e DOING"
+        Tarefa tarefaTodo = criarTarefa("Tarefa TODO", 2, "Geral", TarefaStatus.TODO)
+        Tarefa tarefaDoing = criarTarefa("Tarefa DOING", 3, "Geral", TarefaStatus.DOING)
+        List<Tarefa> tarefas = List.of(tarefaTodo, tarefaDoing)
+
+        when: "o filtro por status e executado para TarefaStatus.DONE"
+        List<Tarefa> resultado = TarefaService.filtrarPorStatus(tarefas, TarefaStatus.DONE)
+
+        then: "o resultado deve ser uma lista vazia"
+        resultado.isEmpty()
+    }
+
+    void "deve retornar lista vazia ao filtrar por status quando o status for nulo"() {
+        given: "uma lista de tarefas valida e status nulo"
+        Tarefa tarefaTodo = criarTarefa("Tarefa TODO", 2, "Geral", TarefaStatus.TODO)
+        List<Tarefa> tarefas = List.of(tarefaTodo)
+        TarefaStatus statusNulo = null
+
+        when: "o filtro por status e executado com status nulo"
+        List<Tarefa> resultado = TarefaService.filtrarPorStatus(tarefas, statusNulo)
+
+        then: "deve retornar uma lista vazia sem lancar excecao"
+        resultado.isEmpty()
+    }
+
+    void "deve retornar lista vazia ao filtrar por status quando a lista de tarefas for nula"() {
+        given: "uma lista de tarefas nula"
+        List<Tarefa> tarefasNulas = null
+
+        when: "o filtro por status e executado"
+        List<Tarefa> resultado = TarefaService.filtrarPorStatus(tarefasNulas, TarefaStatus.DOING)
+
+        then: "deve retornar uma lista vazia sem lancar NullPointerException"
+        resultado.isEmpty()
+    }
+
+    // ==========================================
+    // Contagem por Status
+    // ==========================================
+
+    void "deve contar corretamente as tarefas para cada status"() {
+        given: "uma lista contendo 2 tarefas TODO, 1 DOING e 0 DONE"
+        Tarefa tarefaTodo1 = criarTarefa("Tarefa TODO 1", 1, "Geral", TarefaStatus.TODO)
+        Tarefa tarefaTodo2 = criarTarefa("Tarefa TODO 2", 2, "Geral", TarefaStatus.TODO)
+        Tarefa tarefaDoing = criarTarefa("Tarefa DOING", 3, "Geral", TarefaStatus.DOING)
+        List<Tarefa> tarefas = List.of(tarefaTodo1, tarefaTodo2, tarefaDoing)
+
+        when: "o metodo contarPorStatus e chamado para cada um dos status"
+        long totalTodo = TarefaService.contarPorStatus(tarefas, TarefaStatus.TODO)
+        long totalDoing = TarefaService.contarPorStatus(tarefas, TarefaStatus.DOING)
+        long totalDone = TarefaService.contarPorStatus(tarefas, TarefaStatus.DONE)
+
+        then: "as quantidades contadas devem coincidir exatamente com os dados da lista"
+        totalTodo == 2L
+        totalDoing == 1L
+        totalDone == 0L
+    }
+
+    void "deve retornar 0 ao contar tarefas para status que nao possui ocorrencias"() {
+        given: "uma lista contendo apenas tarefas TODO"
+        Tarefa tarefaTodo = criarTarefa("Tarefa TODO", 1, "Geral", TarefaStatus.TODO)
+        List<Tarefa> tarefas = List.of(tarefaTodo)
+
+        when: "o metodo contarPorStatus e chamado para TarefaStatus.DONE"
+        long totalDone = TarefaService.contarPorStatus(tarefas, TarefaStatus.DONE)
+
+        then: "o total retornado deve ser zero"
+        totalDone == 0L
+    }
+
+    void "deve retornar 0 ao contar tarefas quando o status for nulo"() {
+        given: "uma lista valida de tarefas e um status nulo"
+        Tarefa tarefaTodo = criarTarefa("Tarefa TODO", 1, "Geral", TarefaStatus.TODO)
+        List<Tarefa> tarefas = List.of(tarefaTodo)
+        TarefaStatus statusNulo = null
+
+        when: "o metodo contarPorStatus e acionado com status nulo"
+        long total = TarefaService.contarPorStatus(tarefas, statusNulo)
+
+        then: "o total retornado deve ser zero"
+        total == 0L
+    }
+
+    void "deve retornar 0 ao contar tarefas quando a lista de tarefas for nula"() {
+        given: "uma lista de tarefas nula"
+        List<Tarefa> tarefasNulas = null
+
+        when: "o metodo contarPorStatus e acionado"
+        long total = TarefaService.contarPorStatus(tarefasNulas, TarefaStatus.TODO)
+
+        then: "o total retornado deve ser zero sem lancar NullPointerException"
+        total == 0L
+    }
+}
