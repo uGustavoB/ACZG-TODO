@@ -111,6 +111,108 @@ class TarefaServiceSpec extends Specification {
     }
 
     // ==========================================
+    // Atualizacao de Tarefas (Update)
+    // ==========================================
+
+    void "deve atualizar tarefa existente alterando seus atributos e elevando sua prioridade com reordenacao"() {
+        given: "uma lista com 2 tarefas: Tarefa A (prioridade 4, indice 0) e Tarefa B (prioridade 2, indice 1)"
+        Tarefa tarefaA = criarTarefa("Tarefa A", 4, "Trabalho", TarefaStatus.TODO)
+        Tarefa tarefaB = criarTarefa("Tarefa B", 2, "Trabalho", TarefaStatus.TODO)
+        List<Tarefa> tarefas = new ArrayList<Tarefa>(List.of(tarefaA, tarefaB))
+        Tarefa tarefaBAtualizada = criarTarefa("Tarefa B Atualizada", 5, "Trabalho Prioritario", TarefaStatus.DOING)
+
+        when: "a tarefa no indice 1 e atualizada com nova prioridade 5"
+        boolean sucesso = TarefaService.atualizarTarefa(tarefas, 1, tarefaBAtualizada)
+
+        then: "a atualizacao deve retornar sucesso"
+        sucesso
+
+        and: "a lista deve permanecer com 2 tarefas e a tarefaBAtualizada deve ocupar o indice 0"
+        tarefas.size() == 2
+        tarefas.get(0) == tarefaBAtualizada
+        tarefas.get(0).getNome() == "Tarefa B Atualizada"
+        tarefas.get(0).getCategoria() == "Trabalho Prioritario"
+        tarefas.get(0).getStatus() == TarefaStatus.DOING
+        tarefas.get(0).getPrioridade() == 5
+
+        and: "a Tarefa A deve passar para o indice 1"
+        tarefas.get(1) == tarefaA
+        tarefas.get(1).getPrioridade() == 4
+    }
+
+    void "deve atualizar tarefa existente mantendo a prioridade e garantindo permanencia dos dados alterados"() {
+        given: "uma lista contendo 2 tarefas"
+        Tarefa tarefa1 = criarTarefa("Tarefa 1", 3, "Trabalho", TarefaStatus.TODO)
+        Tarefa tarefa2 = criarTarefa("Tarefa 2", 1, "Estudos", TarefaStatus.TODO)
+        List<Tarefa> tarefas = new ArrayList<Tarefa>(List.of(tarefa1, tarefa2))
+        Tarefa tarefa1Modificada = criarTarefa("Tarefa 1 Modificada", 3, "Trabalho Concluido", TarefaStatus.DONE)
+
+        when: "a tarefa no indice 0 e atualizada mantendo a prioridade 3"
+        boolean sucesso = TarefaService.atualizarTarefa(tarefas, 0, tarefa1Modificada)
+
+        then: "a operacao deve ser bem-sucedida"
+        sucesso
+
+        and: "os dados atualizados devem ser refletidos no indice correspondente"
+        tarefas.size() == 2
+        tarefas.get(0) == tarefa1Modificada
+        tarefas.get(0).getNome() == "Tarefa 1 Modificada"
+        tarefas.get(0).getCategoria() == "Trabalho Concluido"
+        tarefas.get(0).getStatus() == TarefaStatus.DONE
+        tarefas.get(1) == tarefa2
+    }
+
+    void "deve retornar false e nao alterar a lista ao tentar atualizar sobre lista vazia"() {
+        given: "uma lista de tarefas vazia e uma tarefa para atualizacao"
+        List<Tarefa> tarefasVazias = new ArrayList<Tarefa>()
+        Tarefa tarefaAtualizada = criarTarefa("Tarefa Invalida", 3, "Trabalho", TarefaStatus.TODO)
+
+        when: "a rotina de atualizacao e executada sobre a lista vazia"
+        boolean sucesso = TarefaService.atualizarTarefa(tarefasVazias, 0, tarefaAtualizada)
+
+        then: "deve retornar false, nao lancar excecao e a lista deve permanecer vazia"
+        !sucesso
+        tarefasVazias.isEmpty()
+        notThrown(Exception)
+    }
+
+    void "deve retornar false ao tentar atualizar com indice fora dos limites da lista"() {
+        given: "uma lista contendo 1 tarefa"
+        Tarefa tarefa = criarTarefa("Tarefa Unica", 3, "Trabalho", TarefaStatus.TODO)
+        List<Tarefa> tarefas = new ArrayList<Tarefa>(List.of(tarefa))
+        Tarefa tarefaAtualizada = criarTarefa("Tarefa Atualizada", 4, "Trabalho", TarefaStatus.DOING)
+
+        when: "a atualizacao e tentada com indice negativo e com indice alem do limite"
+        boolean sucessoIndiceNegativo = TarefaService.atualizarTarefa(tarefas, -1, tarefaAtualizada)
+        boolean sucessoIndiceAlemLimite = TarefaService.atualizarTarefa(tarefas, 1, tarefaAtualizada)
+
+        then: "ambas as tentativas devem falhar e a lista deve permanecer inalterada"
+        !sucessoIndiceNegativo
+        !sucessoIndiceAlemLimite
+        tarefas.size() == 1
+        tarefas.get(0) == tarefa
+    }
+
+    void "deve retornar false e nao lancar excecao ao tentar atualizar com lista nula ou tarefa nula"() {
+        given: "uma lista valida, uma tarefa valida, uma lista nula e uma tarefa nula"
+        Tarefa tarefaValida = criarTarefa("Tarefa Valida", 3, "Trabalho", TarefaStatus.TODO)
+        List<Tarefa> tarefasValidas = new ArrayList<Tarefa>(List.of(tarefaValida))
+        List<Tarefa> tarefasNulas = null
+        Tarefa tarefaNula = null
+
+        when: "a atualizacao e tentada com lista nula ou tarefa nula"
+        boolean sucessoListaNula = TarefaService.atualizarTarefa(tarefasNulas, 0, tarefaValida)
+        boolean sucessoTarefaNula = TarefaService.atualizarTarefa(tarefasValidas, 0, tarefaNula)
+
+        then: "deve retornar false para ambas as chamadas sem lancar excecao"
+        !sucessoListaNula
+        !sucessoTarefaNula
+        tarefasValidas.size() == 1
+        tarefasValidas.get(0) == tarefaValida
+        notThrown(NullPointerException)
+    }
+
+    // ==========================================
     // Filtro por Categoria
     // ==========================================
 
