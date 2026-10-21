@@ -27,6 +27,17 @@ O sistema de alarmes permite acompanhar os prazos das tarefas de forma proativa:
 
 ---
 
+## Testes Automatizados
+
+O projeto conta com uma suíte abrangente de testes unitários automatizados desenvolvida com **Spock Framework (Groovy)**, adotando **tipagem estática** e a estrutura comportamental **Given / When / Then**. Os testes garantem confiabilidade e isolamento para todas as regras de negócio do CRUD:
+
+- **Criação (Create)**: Valida inserção em listas vazias e existentes, reordenação automática por prioridade (prioridade 5 no topo) e comportamento defensivo contra valores nulos.
+- **Consulta e Filtros (Read)**: Cobre filtragem por Categoria (*case-insensitive* e com remoção de espaços nas extremidades), Prioridade (1 a 5), Status (`TODO`, `DOING`, `DONE`) e contadores por status, incluindo tratamento seguro de valores nulos ou inexistentes.
+- **Atualização (Update)**: Garante a alteração de atributos, reordenação imediata ao elevar a prioridade, manutenção da consistência dos dados e proteção contra índices fora dos limites.
+- **Exclusão (Delete)**: Testa a remoção por índice válido com decremento do tamanho da coleção, além de retorno seguro sem exceções em listas vazias ou com índices inválidos.
+
+---
+
 ## Estrutura do Projeto
 
 ```
@@ -38,42 +49,49 @@ ACZG-TODO/
 │   │   └── app.js             # Lógica do CRUD e manipulação dinâmica do DOM
 │   └── index.html             # Interface web principal
 ├── src/
-│   └── main/
-│       └── java/
+│   ├── main/
+│   │   └── java/
+│   │       └── org/
+│   │           └── example/
+│   │               ├── Main.java              # Ponto de entrada da aplicação Java
+│   │               ├── model/
+│   │               │   ├── Alarme.java        # Entidade de Alarme (antecedência e estado)
+│   │               │   ├── Tarefa.java        # Entidade de Tarefa
+│   │               │   └── TarefaStatus.java  # Enumeração de Status (TODO, DOING, DONE)
+│   │               ├── services/
+│   │               │   ├── AlarmeService.java # Agendamento em background e verificação de alarmes
+│   │               │   ├── CsvService.java    # Responsável pela persistência (I/O)
+│   │               │   ├── SomService.java    # Execução de alertas sonoros
+│   │               │   └── TarefaService.java # Lógica de negócios (adicionar, listar, editar, etc)
+│   │               └── ui/
+│   │                   └── ConsoleUI.java     # Gerenciamento de interface e leitura de inputs
+│   └── test/
+│       └── groovy/
 │           └── org/
 │               └── example/
-│                   ├── Main.java              # Ponto de entrada da aplicação Java
-│                   ├── model/
-│                   │   ├── Alarme.java        # Entidade de Alarme (antecedência e estado)
-│                   │   ├── Tarefa.java        # Entidade de Tarefa
-│                   │   └── TarefaStatus.java  # Enumeração de Status (TODO, DOING, DONE)
-│                   ├── services/
-│                   │   ├── AlarmeService.java # Agendamento em background e verificação de alarmes
-│                   │   ├── CsvService.java    # Responsável pela persistência (I/O)
-│                   │   ├── SomService.java    # Execução de alertas sonoros
-│                   │   └── TarefaService.java # Lógica de negócios (adicionar, listar, editar, etc)
-│                   └── ui/
-│                       └── ConsoleUI.java     # Gerenciamento de interface e leitura de inputs
+│                   └── services/
+│                       └── TarefaServiceSpec.groovy # Especificação e suíte de testes do CRUD (Spock)
 ```
 
 ---
 
 ## Descrição dos Arquivos Principais
 
-| Arquivo              | Descrição                                                                                                                                      |
-|----------------------|------------------------------------------------------------------------------------------------------------------------------------------------|
-| `Main.java`          | Classe principal que orquestra o loop da aplicação, os menus primários e a verificação inicial de alarmes.                                     |
-| `Alarme.java`        | Entidade que representa um alarme com minutos de antecedência e cálculo do horário de disparo.                                                 |
-| `Tarefa.java`        | Entidade que representa os dados de uma tarefa: Nome, Descrição, Data/Hora de Término, Prioridade, Categoria, Status e Lista de Alarmes.       |
-| `TarefaStatus.java`  | Enum que define os estados possíveis da tarefa (`TODO`, `DOING`, `DONE`).                                                                      |
-| `AlarmeService.java` | Gerencia o agendamento assíncrono em background dos alarmes e a checagem de tarefas no período de antecedência ao iniciar.                     |
-| `CsvService.java`    | Salva e carrega a lista de tarefas e alarmes no arquivo `tarefas.csv`.                                                                         |
-| `SomService.java`    | Utilitário para reprodução de efeitos sonoros quando um alarme é disparado.                                                                    |
-| `TarefaService.java` | Concentra as regras de negócio: adiciona, atualiza, deleta, filtra e exibe o painel de estatísticas, além de fazer a ordenação por prioridade. |
-| `ConsoleUI.java`     | Centraliza as interações com o console: limpeza de tela, leitura formatada e segura de textos, números, datas/horas e *enums*.                 |
-| `index.html`         | Interface web com formulário para cadastro/edição, filtro por status e tabela de tarefas.                                                     |
-| `style.css`          | Estilização do front-end com Flexbox para estruturação responsiva e componentes limpos.                                                        |
-| `app.js`             | Controle dinâmico do front-end: manipulação de eventos, ordenação por prioridade e CRUD em memória.                                             |
+| Arquivo                    | Descrição                                                                                                                                      |
+|----------------------------|------------------------------------------------------------------------------------------------------------------------------------------------|
+| `Main.java`                | Classe principal que orquestra o loop da aplicação, os menus primários e a verificação inicial de alarmes.                                     |
+| `Alarme.java`              | Entidade que representa um alarme com minutos de antecedência e cálculo do horário de disparo.                                                 |
+| `Tarefa.java`              | Entidade que representa os dados de uma tarefa: Nome, Descrição, Data/Hora de Término, Prioridade, Categoria, Status e Lista de Alarmes.       |
+| `TarefaStatus.java`        | Enum que define os estados possíveis da tarefa (`TODO`, `DOING`, `DONE`).                                                                      |
+| `AlarmeService.java`       | Gerencia o agendamento assíncrono em background dos alarmes e a checagem de tarefas no período de antecedência ao iniciar.                     |
+| `CsvService.java`          | Salva e carrega a lista de tarefas e alarmes no arquivo `tarefas.csv`.                                                                         |
+| `SomService.java`          | Utilitário para reprodução de efeitos sonoros quando um alarme é disparado.                                                                    |
+| `TarefaService.java`       | Concentra as regras de negócio: adiciona, atualiza, deleta, filtra e exibe o painel de estatísticas, além de fazer a ordenação por prioridade. |
+| `ConsoleUI.java`           | Centraliza as interações com o console: limpeza de tela, leitura formatada e segura de textos, números, datas/horas e *enums*.                 |
+| `TarefaServiceSpec.groovy` | Especificação em Spock com 31 testes unitários cobrindo as regras do CRUD com tipagem estática e formato Given/When/Then.                      |
+| `index.html`               | Interface web com formulário para cadastro/edição, filtro por status e tabela de tarefas.                                                      |
+| `style.css`                | Estilização do front-end com Flexbox para estruturação responsiva e componentes limpos.                                                        |
+| `app.js`                   | Controle dinâmico do front-end: manipulação de eventos, ordenação por prioridade e CRUD em memória.                                            |
 
 ---
 
@@ -96,6 +114,7 @@ ACZG-TODO/
 ### Backend
 - **Java**
 - **Gradle** (Gerenciador de dependências e build)
+- **Groovy & Spock Framework** 
 
 ### Frontend
 - **HTML5** (Estruturação semântica dos elementos e formulários)
@@ -131,6 +150,18 @@ ACZG-TODO/
     ```bash
     java -cp build/classes/java/main org.example.Main
     ```
+
+### Testes Automatizados
+Para executar a suíte de testes unitários do CRUD:
+- **No Windows:**
+  ```bash
+  ./gradlew.bat test
+  ```
+- **No Linux/Mac:**
+  ```bash
+  ./gradlew test
+  ```
+O relatório detalhado em HTML é gerado automaticamente em: `build/reports/tests/test/index.html`.
 
 ### Frontend (Interface Web)
 - Abra diretamente o arquivo [`frontend/index.html`](frontend/index.html) no seu navegador preferido ou utilize a extensão **Live Server** no VS Code / IntelliJ IDEA.
