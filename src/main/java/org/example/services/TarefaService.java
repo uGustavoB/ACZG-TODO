@@ -14,6 +14,10 @@ import java.util.stream.Collectors;
 public class TarefaService {
 
     public static void adicionarTarefa(List<Tarefa> tarefas) {
+        if (tarefas == null) {
+            return;
+        }
+
         ConsoleUI.limparTela();
         ConsoleUI.imprimirCabecalho("Adicionar Nova Tarefa");
 
@@ -33,13 +37,19 @@ public class TarefaService {
             querAlarme = ConsoleUI.lerConfirmacao("Deseja adicionar outro alarme para esta mesma tarefa?");
         }
 
-        tarefas.add(novaTarefa);
+        adicionarTarefa(tarefas, novaTarefa);
         AlarmeService.agendarAlarmes(novaTarefa);
-
-        tarefas.sort(Comparator.comparingInt(Tarefa::getPrioridade).reversed());
         CsvService.salvarTarefas(tarefas);
 
         ConsoleUI.imprimirMensagem("Tarefa adicionada com sucesso!");
+    }
+
+    public static void adicionarTarefa(List<Tarefa> tarefas, Tarefa novaTarefa) {
+        if (tarefas == null || novaTarefa == null) {
+            return;
+        }
+        tarefas.add(novaTarefa);
+        tarefas.sort(Comparator.comparingInt(Tarefa::getPrioridade).reversed());
     }
 
     public static void exibirMenuListagem(List<Tarefa> tarefas) {
@@ -147,7 +157,7 @@ public class TarefaService {
         ConsoleUI.limparTela();
         ConsoleUI.imprimirCabecalho("Lista de Tarefas");
 
-        if (tarefas.isEmpty()) {
+        if (tarefas == null || tarefas.isEmpty()) {
             ConsoleUI.imprimirMensagem("Nenhuma tarefa cadastrada.");
             return;
         }
@@ -158,11 +168,12 @@ public class TarefaService {
     }
 
     public static void atualizarTarefa(List<Tarefa> tarefas) {
-        listarTarefas(tarefas);
-
-        if (tarefas.isEmpty()) {
+        if (tarefas == null || tarefas.isEmpty()) {
+            listarTarefas(tarefas);
             return;
         }
+
+        listarTarefas(tarefas);
 
         int indice = ConsoleUI.lerEscolha("Escolha o número da tarefa para atualizar: ", 1, tarefas.size()) - 1;
         Tarefa tarefa = tarefas.get(indice);
@@ -207,25 +218,43 @@ public class TarefaService {
             AlarmeService.agendarAlarmes(tarefa);
         }
 
-        tarefas.sort(Comparator.comparingInt(Tarefa::getPrioridade).reversed());
+        atualizarTarefa(tarefas, indice, tarefa);
         CsvService.salvarTarefas(tarefas);
 
         System.out.println("Tarefa atualizada com sucesso!");
     }
 
-    public static void deletarTarefa(List<Tarefa> tarefas) {
-        listarTarefas(tarefas);
+    public static boolean atualizarTarefa(List<Tarefa> tarefas, int indice, Tarefa tarefaAtualizada) {
+        if (tarefas == null || tarefaAtualizada == null || indice < 0 || indice >= tarefas.size()) {
+            return false;
+        }
+        tarefas.set(indice, tarefaAtualizada);
+        tarefas.sort(Comparator.comparingInt(Tarefa::getPrioridade).reversed());
+        return true;
+    }
 
-        if (tarefas.isEmpty()) {
+    public static void deletarTarefa(List<Tarefa> tarefas) {
+        if (tarefas == null || tarefas.isEmpty()) {
+            listarTarefas(tarefas);
             return;
         }
 
+        listarTarefas(tarefas);
+
         int indice = ConsoleUI.lerEscolha("Escolha o número da tarefa para deletar: ", 1, tarefas.size()) - 1;
-        Tarefa tarefaRemovida = tarefas.remove(indice);
+        Tarefa tarefaRemovida = removerTarefa(tarefas, indice);
 
-        AlarmeService.cancelarAlarmes(tarefaRemovida);
-        CsvService.salvarTarefas(tarefas);
+        if (tarefaRemovida != null) {
+            AlarmeService.cancelarAlarmes(tarefaRemovida);
+            CsvService.salvarTarefas(tarefas);
+            System.out.println("Tarefa '" + tarefaRemovida.getNome() + "' deletada com sucesso!");
+        }
+    }
 
-        System.out.println("Tarefa '" + tarefaRemovida.getNome() + "' deletada com sucesso!");
+    public static Tarefa removerTarefa(List<Tarefa> tarefas, int indice) {
+        if (tarefas == null || indice < 0 || indice >= tarefas.size()) {
+            return null;
+        }
+        return tarefas.remove(indice);
     }
 }
